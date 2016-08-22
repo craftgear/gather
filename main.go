@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"path/filepath"
+	"strings"
 )
 
 func glob(dir string) ([]string, error) {
@@ -15,24 +17,62 @@ func glob(dir string) ([]string, error) {
 	return files, nil
 }
 
+func extractDirname(filename, delimiter string) string {
+	a := strings.Split(filename, delimiter)
+	if a[0] == filename {
+		return ""
+	}
+	return a[0]
+}
+
+func move(fname, dname string) error {
+	//ディレクトリがなければ作成
+	if err := os.Mkdir(dname, os.ModeDir); err != nil {
+		return err
+	}
+
+	newName := filepath.Join(dname, string(filepath.Separator), fname)
+	fmt.Printf("move %v to %v\n", fname, newName)
+	//ディレクトリにファイル移動
+	if err := os.Rename(fname, newName); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func main() {
+	var dir string
+	var delimiter string
+
 	//コマンドラインオプション解析
-	//1. 対象ディレク折
-	dir := flag.String("dir", "./", "a directory where files are in")
+	//1. 対象ディレクトリ
+	flag.StringVar(&dir, "dir", "./", "a directory where files are in")
 	//2. デリミタ
-	delimiter := flag.String("delimiter", " - ", "a delimiter which separates filenames into two parts")
-	fmt.Println(*dir, *delimiter)
+	flag.StringVar(&delimiter, "delimiter", " - ", "a delimiter which separates filenames into two parts")
+	flag.Parse()
+
+	fmt.Println(dir, delimiter)
 
 	//ファイルリスト一覧取得
-	files, err := glob(*dir)
+	files, err := glob(dir)
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Printf("files = %+v\n", files)
 
-	//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
-	//前半分のディレクトリを探す
-	//ディレクトリがなければ作成
-	//ディレクトリにファイル移動
+	for _, v := range files {
+		fmt.Printf("v = %+v\n", v)
+		//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
+		dname := extractDirname(v, delimiter)
+		if dname == "" {
+			continue
+		}
+
+		if err := move(dname, v); err != nil {
+			log.Fatalf("error %v", err)
+		}
+
+	}
 
 }
