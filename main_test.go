@@ -6,6 +6,10 @@ import (
 	"testing"
 )
 
+func TestMain(m *testing.M) {
+	m.Run()
+}
+
 func TestGlob(t *testing.T) {
 	expectedSlice := []string{"a - 01.txt", "b - 01.txt"}
 	files, err := glob("./test")
@@ -23,6 +27,7 @@ func TestExtractDirname(t *testing.T) {
 		n        string
 		expected string
 	}{
+		{"a", ""},
 		{"a.txt", ""},
 		{"a - 01.txt", "a"},
 	}
@@ -34,11 +39,28 @@ func TestExtractDirname(t *testing.T) {
 	}
 }
 
-func TestMove(t *testing.T) {
+func TestMoveFail(t *testing.T) {
 	fname := "./test/a - 01.txt"
 	name := extractDirname(fname, " - ")
-	move(name, fname)
-	if _, err := os.Stat("./test/a/a - 01.txt"); err != nil {
+	err := move(name, fname)
+
+	if err == nil {
+		t.Error("An error should be occured.")
+	}
+}
+
+func TestMove(t *testing.T) {
+	fname := "./test/c - 03.txt"
+	name := extractDirname(fname, " - ")
+	err := move(name, fname)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, err = os.Stat("./test/c/c - 03.txt"); err != nil {
 		t.Errorf("error %v", err)
 	}
+
+	move("./test", "./test/c/c - 03.txt")
+	os.Remove("./test/c")
 }
