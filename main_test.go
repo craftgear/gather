@@ -6,18 +6,21 @@ import (
 	"testing"
 )
 
+var testDir string = "test/"
+
 func TestMain(m *testing.M) {
 	m.Run()
 }
 
 func TestGlob(t *testing.T) {
-	expectedSlice := []string{"a - 01.txt", "b - 01.txt"}
-	files, err := glob("./test")
+	expectedSlice := []string{testDir + "a", testDir + "a - 01.txt", testDir + "b - 02.txt", testDir + "c - 03.txt"}
+	files, err := glob(testDir)
+
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if reflect.DeepEqual(files, expectedSlice) {
+	if reflect.DeepEqual(files, expectedSlice) == false {
 		t.Fatal("files are different from expected ones.", files, expectedSlice)
 	}
 }
