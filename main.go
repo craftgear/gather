@@ -27,18 +27,22 @@ func extractDirname(filename, delimiter string) string {
 	return a[0]
 }
 
-//func mkDir(dname string, ignoreCase bool) error {
+//func mkDir(dirName string, ignoreCase bool) (string, error) {
+//path, dir := filepath.Split(dname)
+
+////pathのディレクトリ一覧
+////小文字にして比較
 
 //}
 
-func move(dname, fname string) error {
+func move(dirName, fileName string) error {
 	//ディレクトリ作成、すでにディレクトリかファイルがある場合エラーになるので、エラーは無視する
 	// TODO ignore caseをどうやったら実現できるか？
-	_ = os.Mkdir(dname, 0755)
+	_ = os.Mkdir(dirName, 0755)
 
-	newName := filepath.Join(dname, string(filepath.Separator), filepath.Base(fname))
+	newName := filepath.Join(dirName, string(filepath.Separator), filepath.Base(fileName))
 	//ディレクトリにファイル移動
-	if err := os.Rename(fname, newName); err != nil {
+	if err := os.Rename(fileName, newName); err != nil {
 		return err
 	}
 
@@ -49,16 +53,23 @@ func main() {
 	var dir string
 	var delimiter string
 	var help bool
-	//var ignoreCase bool
+	var ignoreCase bool
+	var confirmation bool
+	var fileonly bool
 
 	//コマンドラインオプション解析
 	// デリミタ
 	flag.StringVar(&delimiter, "d", " - ", "a delimiter which separates filenames into two parts")
 	flag.BoolVar(&help, "h", false, "show help")
-	//flag.StringBool(&ignoreCase, "ignore case", false, "ignore case of dir names")
+	flag.BoolVar(&ignoreCase, "i", false, "ignore case of dir names")
+	flag.BoolVar(&confirmation, "c", false, "show a confirmation before moving files")
+	flag.BoolVar(&fileonly, "f", false, "move only files")
 	flag.Parse()
 
 	if help {
+		fmt.Println("\ngather - a simple utility to move files\n")
+		fmt.Println("Usage: gather [options] target_dir")
+		fmt.Println("Options:")
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
@@ -68,8 +79,6 @@ func main() {
 	} else {
 		dir = "./"
 	}
-	fmt.Printf("dir = %+v\n", dir)
-	fmt.Printf("delimiter = %+v len='%+v'\n", delimiter, len(delimiter))
 
 	if len(delimiter) == 0 {
 		fmt.Println("delimiter cannot be empty.")
@@ -81,21 +90,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("files = %+v\n", files)
 
 	for _, f := range files {
-		//fmt.Printf("v = %+v\n", f)
 		//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
-		dname := extractDirname(f, delimiter)
-		//fmt.Printf("dname = %+v\n", dname)
-		if dname == "" {
+		dirName := extractDirname(f, delimiter)
+		if dirName == "" {
 			continue
 		}
 
-		if err := move(dname, f); err != nil {
+		if err := move(dirName, f); err != nil {
 			log.Fatalf("error %v", err)
 		}
-
 	}
-
 }
