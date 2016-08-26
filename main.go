@@ -54,7 +54,7 @@ func main() {
 	var delimiter string
 	var help bool
 	var ignoreCase bool
-	var confirmation bool
+	var dryRun bool
 	var fileonly bool
 
 	//コマンドラインオプション解析
@@ -62,7 +62,7 @@ func main() {
 	flag.StringVar(&delimiter, "d", " - ", "a delimiter which separates filenames into two parts")
 	flag.BoolVar(&help, "h", false, "show help")
 	flag.BoolVar(&ignoreCase, "i", false, "ignore case of dir names")
-	flag.BoolVar(&confirmation, "c", false, "show a confirmation before moving files")
+	flag.BoolVar(&dryRun, "dry-run", false, "dry run")
 	flag.BoolVar(&fileonly, "f", false, "move only files")
 	flag.Parse()
 
@@ -97,6 +97,8 @@ func main() {
 		if dirName == "" {
 			continue
 		}
+
+		//TODO dirNameがスペースで終わらないようにする
 
 		if err := move(dirName, f); err != nil {
 			log.Fatalf("error %v", err)
