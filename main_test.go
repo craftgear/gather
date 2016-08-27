@@ -13,15 +13,21 @@ func TestMain(m *testing.M) {
 }
 
 func TestGlob(t *testing.T) {
-	expectedSlice := []string{testDir + "a", testDir + "a - 01.txt", testDir + "b - 02.txt", testDir + "c - 03.txt"}
+	expected := []string{
+		testDir + "B",
+		testDir + "a",
+		testDir + "a - 01.txt",
+		testDir + "b - 02.txt",
+		testDir + "c - 03.txt",
+	}
 	files, err := glob(testDir)
 
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if reflect.DeepEqual(files, expectedSlice) == false {
-		t.Fatal("files are different from expected ones.", files, expectedSlice)
+	if reflect.DeepEqual(files, expected) == false {
+		t.Fatal("files are different from expected ones.", files, expected)
 	}
 }
 
@@ -45,17 +51,58 @@ func TestExtractDirname(t *testing.T) {
 func TestMoveFail(t *testing.T) {
 	fname := "./test/a - 01.txt"
 	name := extractDirname(fname, " - ")
-	err := move(name, fname)
+	err := move(name, fname, false)
 
 	if err == nil {
 		t.Error("An error should be occured.")
 	}
 }
 
+func TestGlobDir(t *testing.T) {
+	expected := []string{testDir + "B"}
+	dirs, err := globDir(testDir)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(dirs, expected) {
+		t.Fatal("dirs are different from expected ones.", dirs, expected)
+	}
+
+}
+
+func TestMkDir(t *testing.T) {
+	dirName, err := mkDir(testDir+"B", false)
+	if err != nil {
+		t.Fatal("err should be nil.", err)
+	}
+	if dirName != testDir+"B" {
+		t.Errorf("testDir should be %s but got %s", testDir+"B", dirName)
+	}
+
+	dirName, err = mkDir(testDir+"b", true)
+	if err != nil {
+		t.Fatal("err should be nil.", err)
+	}
+	if dirName != testDir+"B" {
+		t.Errorf("testDir should be %s but got %s", testDir+"B", dirName)
+	}
+
+	dirName, err = mkDir(testDir+"a", false)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if dirName != testDir+"a" {
+		t.Errorf("testDir should be %s but got %s", testDir+"a", dirName)
+	}
+
+}
+
 func TestMove(t *testing.T) {
 	fname := "./test/c - 03.txt"
-	name := extractDirname(fname, " - ")
-	err := move(name, fname)
+	dest := extractDirname(fname, " - ")
+	err := move(dest, fname, false)
 	if err != nil {
 		t.Error(err)
 	}
@@ -64,6 +111,6 @@ func TestMove(t *testing.T) {
 		t.Errorf("error %v", err)
 	}
 
-	move("./test", "./test/c/c - 03.txt")
+	move("./test", "./test/c/c - 03.txt", false)
 	os.Remove("./test/c")
 }

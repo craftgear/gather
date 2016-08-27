@@ -27,22 +27,64 @@ func extractDirname(filename, delimiter string) string {
 	return a[0]
 }
 
-//func mkDir(dirName string, ignoreCase bool) (string, error) {
-//path, dir := filepath.Split(dname)
+func globDir(path string) ([]string, error) {
+	dir := []string{}
+	entries, err := filepath.Glob(filepath.Join(path, string(filepath.Separator), "[^.]*"))
+	if err != nil {
+		return nil, err
+	}
 
-////pathのディレクトリ一覧
-////小文字にして比較
+	for _, e := range entries {
+		fi, err := os.Stat(e)
+		if err != nil {
+			return nil, err
+		}
+		if fi.IsDir() {
+			dir = append(dir, e)
+		}
+	}
 
-//}
+	return dir, nil
+}
 
-func move(dirName, fileName string) error {
-	//ディレクトリ作成、すでにディレクトリかファイルがある場合エラーになるので、エラーは無視する
-	// TODO ignore caseをどうやったら実現できるか？
-	_ = os.Mkdir(dirName, 0755)
+func mkDir(destName string, ignoreCase bool) (string, error) {
+	if ignoreCase {
+		path, dirName := filepath.Split(destName)
 
-	newName := filepath.Join(dirName, string(filepath.Separator), filepath.Base(fileName))
+		// pathにあるディレクトリ一覧を取得
+		dirs, err := globDir(path)
+		if err != nil {
+			return destName, err
+		}
+		//小文字にして比較
+		for _, v := range dirs {
+			// 一致したら、小文字にする前の値を返す
+			if strings.ToLower(filepath.Base(v)) == strings.ToLower(dirName) {
+				return v, nil
+			}
+		}
+	}
+
+	// 一致するものがなかったらディレクトリ作成、すでにディレクトリかファイルがある場合エラーになるので、エラーは無視する
+	_ = os.Mkdir(destName, 0755)
+	return destName, nil
+}
+
+func move(destName, fileName string, ignoreCase bool) error {
+	destName, err := filepath.Abs(destName)
+	if err != nil {
+		return err
+	}
+
+	//ディレクトリ作成
+	destName, err = mkDir(destName, ignoreCase)
+	if err != nil {
+		return err
+	}
+
+	newName := filepath.Join(destName, string(filepath.Separator), filepath.Base(fileName))
 	//ディレクトリにファイル移動
-	if err := os.Rename(fileName, newName); err != nil {
+	if err = os.Rename(fileName, newName); err != nil {
 		return err
 	}
 
@@ -93,14 +135,12 @@ func main() {
 
 	for _, f := range files {
 		//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
-		dirName := extractDirname(f, delimiter)
-		if dirName == "" {
+		destName := strings.TrimSpace(extractDirname(f, delimiter))
+		if destName == "" {
 			continue
 		}
 
-		//TODO dirNameがスペースで終わらないようにする
-
-		if err := move(dirName, f); err != nil {
+		if err := move(destName, f, ignoreCase); err != nil {
 			log.Fatalf("error %v", err)
 		}
 	}
