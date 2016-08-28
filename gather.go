@@ -98,6 +98,7 @@ func main() {
 	var ignoreCase bool
 	var dryRun bool
 	var fileonly bool
+	var winRename bool
 
 	//コマンドラインオプション解析
 	// デリミタ
@@ -106,6 +107,7 @@ func main() {
 	flag.BoolVar(&ignoreCase, "i", false, "ignore case of dir names")
 	flag.BoolVar(&dryRun, "dry-run", false, "dry run")
 	flag.BoolVar(&fileonly, "f", false, "move only files")
+	flag.BoolVar(&winRename, "win-rename", false, "replace characters forbidden on windows platforms with 2-byte characters")
 	flag.Parse()
 
 	if help {
@@ -139,7 +141,8 @@ func main() {
 		if destName == "" {
 			continue
 		}
-
+		//TODO dry run 実装
+		//TODO win rename 実装
 		if err := move(destName, f, ignoreCase); err != nil {
 			log.Fatalf("error %v", err)
 		}
