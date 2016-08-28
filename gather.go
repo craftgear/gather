@@ -29,7 +29,7 @@ func extractDirname(filename, delimiter string) string {
 
 func globDir(path string) ([]string, error) {
 	dir := []string{}
-	entries, err := filepath.Glob(filepath.Join(path, string(filepath.Separator), "[^.]*"))
+	entries, err := filepath.Glob(filepath.Join(path, "[^.]*"))
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +60,7 @@ func mkDir(destName string, ignoreCase bool) (string, error) {
 		for _, v := range dirs {
 			// 一致したら、小文字にする前の値を返す
 			if strings.ToLower(filepath.Base(v)) == strings.ToLower(dirName) {
+
 				return v, nil
 			}
 		}
@@ -70,21 +71,16 @@ func mkDir(destName string, ignoreCase bool) (string, error) {
 	return destName, nil
 }
 
-func move(destName, fileName string, ignoreCase bool) error {
-	destName, err := filepath.Abs(destName)
+func move(destName, fileName string) error {
+
+	absDestName, err := filepath.Abs(destName)
 	if err != nil {
-		return err
+		log.Fatal(err)
 	}
 
-	//ディレクトリ作成
-	destName, err = mkDir(destName, ignoreCase)
-	if err != nil {
-		return err
-	}
-
-	newName := filepath.Join(destName, string(filepath.Separator), filepath.Base(fileName))
 	//ディレクトリにファイル移動
-	if err = os.Rename(fileName, newName); err != nil {
+	newName := filepath.Join(absDestName, filepath.Base(fileName))
+	if err := os.Rename(fileName, newName); err != nil {
 		return err
 	}
 
@@ -141,10 +137,21 @@ func main() {
 		if destName == "" {
 			continue
 		}
-		//TODO dry run 実装
+
+		//ディレクトリ作成
+		destName, err = mkDir(destName, ignoreCase)
+		if err != nil {
+			fmt.Printf("err %v", err)
+		}
 		//TODO win rename 実装
-		if err := move(destName, f, ignoreCase); err != nil {
-			log.Fatalf("error %v", err)
+
+		// dry run 実装
+		if dryRun {
+			fmt.Printf("move %s to %s\n", f, filepath.Join(destName, filepath.Base(f)))
+		} else {
+			if err := move(destName, f); err != nil {
+				log.Fatalf("error %v", err)
+			}
 		}
 	}
 }
