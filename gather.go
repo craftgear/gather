@@ -87,6 +87,29 @@ func move(destName, fileName string) error {
 	return nil
 }
 
+func winCaseRename(filename string) string {
+	var cases = []struct {
+		input  string
+		output string
+	}{
+		{"<", "＜"},
+		{">", "＞"},
+		{":", "："},
+		{"\"", "”"},
+		{"/", "／"},
+		{"\\", "＼"},
+		{"|", "｜"},
+		{"?", "？"},
+		{"*", "＊"},
+	}
+	for _, v := range cases {
+		if strings.Index(filename, v.input) > -1 {
+			filename = strings.Replace(filename, v.input, v.output, -1)
+		}
+	}
+	return filename
+}
+
 func main() {
 	var dir string
 	var delimiter string
@@ -94,7 +117,7 @@ func main() {
 	var ignoreCase bool
 	var dryRun bool
 	var fileonly bool
-	var winRename bool
+	var winCase bool
 
 	//コマンドラインオプション解析
 	// デリミタ
@@ -102,8 +125,8 @@ func main() {
 	flag.BoolVar(&help, "h", false, "show help")
 	flag.BoolVar(&ignoreCase, "i", false, "ignore case of dir names")
 	flag.BoolVar(&dryRun, "dry-run", false, "dry run")
-	flag.BoolVar(&fileonly, "f", false, "move only files")
-	flag.BoolVar(&winRename, "win-rename", false, "replace characters forbidden on windows platforms with 2-byte characters")
+	flag.BoolVar(&fileonly, "f", false, "move files only")
+	flag.BoolVar(&winCase, "wincase", false, "replace characters forbidden on windows platforms with 2-byte characters")
 	flag.Parse()
 
 	if help {
@@ -132,6 +155,12 @@ func main() {
 	}
 
 	for _, f := range files {
+		oldFileName := f
+		// win rename 実装
+		if winCase {
+			f = winCaseRename(f)
+		}
+
 		//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
 		destName := strings.TrimSpace(extractDirname(f, delimiter))
 		if destName == "" {
@@ -143,13 +172,12 @@ func main() {
 		if err != nil {
 			fmt.Printf("err %v", err)
 		}
-		//TODO win rename 実装
 
 		// dry run 実装
 		if dryRun {
-			fmt.Printf("move %s to %s\n", f, filepath.Join(destName, filepath.Base(f)))
+			fmt.Printf("move %s to %s\n", oldFileName, filepath.Join(destName, filepath.Base(f)))
 		} else {
-			if err := move(destName, f); err != nil {
+			if err := move(destName, oldFileName); err != nil {
 				log.Fatalf("error %v", err)
 			}
 		}

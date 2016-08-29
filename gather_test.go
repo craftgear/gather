@@ -117,4 +117,29 @@ func TestMove(t *testing.T) {
 	os.Remove("./test/c")
 
 	//TODO dryRun
+	//TODO winCaseRenae
+}
+
+func TestWinCase(t *testing.T) {
+	var cases = []struct {
+		input    string
+		expected string
+	}{
+		{"<", "＜"},
+		{">", "＞"},
+		{":", "："},
+		{"\"", "”"},
+		{"/", "／"},
+		{"\\", "＼"},
+		{"|", "｜"},
+		{"?", "？"},
+		{"*", "＊"},
+	}
+
+	for _, v := range cases {
+		if renamed := winCaseRename(v.input); renamed != v.expected {
+			t.Errorf("%s should be %s", renamed, v.expected)
+		}
+	}
+
 }
