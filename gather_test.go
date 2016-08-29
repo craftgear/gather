@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"path/filepath"
 	"reflect"
 	"testing"
 )
@@ -52,7 +53,7 @@ func TestMoveFail(t *testing.T) {
 	fname := "./test/a - 01.txt"
 	name := extractDirname(fname, " - ")
 	name, err := mkDir(name, false)
-	err = move(name, fname)
+	err = move(filepath.Join("./test/", name, filepath.Base(fname)), fname)
 
 	if err == nil {
 		t.Error("An error should be occured.")
@@ -101,10 +102,15 @@ func TestMkDir(t *testing.T) {
 }
 
 func TestMove(t *testing.T) {
-	fname := "./test/c - 03.txt"
+	originalName := "./test/c - 03.txt"
+	fname := filepath.Base(originalName)
 	dest := extractDirname(fname, " - ")
+	if dest != "c" {
+		t.Errorf("dest should be 'c'")
+	}
+	dest = filepath.Join("./test", dest)
 	dest, err := mkDir(dest, false)
-	err = move(dest, fname)
+	err = move(filepath.Join(dest, fname), originalName)
 	if err != nil {
 		t.Error(err)
 	}
@@ -113,11 +119,11 @@ func TestMove(t *testing.T) {
 		t.Errorf("error %v", err)
 	}
 
-	move("./test", "./test/c/c - 03.txt")
+	move("./test/c - 03.txt", "./test/c/c - 03.txt")
 	os.Remove("./test/c")
 
 	//TODO dryRun
-	//TODO winCaseRenae
+	//TODO winCaseRename
 }
 
 func TestWinCase(t *testing.T) {

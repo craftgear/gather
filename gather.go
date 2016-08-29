@@ -12,7 +12,7 @@ import (
 // TODO エラーメッセージの多言語化
 
 func glob(dir string) ([]string, error) {
-	files, err := filepath.Glob(dir + string(filepath.Separator) + "[^.]*")
+	files, err := filepath.Glob(filepath.Join(dir, "[^.]*"))
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +71,7 @@ func mkDir(destName string, ignoreCase bool) (string, error) {
 	return destName, nil
 }
 
-func move(destName, fileName string) error {
+func move(destName, originalFileName string) error {
 
 	absDestName, err := filepath.Abs(destName)
 	if err != nil {
@@ -79,8 +79,7 @@ func move(destName, fileName string) error {
 	}
 
 	//ディレクトリにファイル移動
-	newName := filepath.Join(absDestName, filepath.Base(fileName))
-	if err := os.Rename(fileName, newName); err != nil {
+	if err := os.Rename(originalFileName, absDestName); err != nil {
 		return err
 	}
 
@@ -155,29 +154,32 @@ func main() {
 	}
 
 	for _, f := range files {
-		oldFileName := f
+		originalFileName := f
+		filename := filepath.Base(f)
 		// win rename 実装
 		if winCase {
-			f = winCaseRename(f)
+			filename = winCaseRename(filename)
 		}
 
 		//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
-		destName := strings.TrimSpace(extractDirname(f, delimiter))
-		if destName == "" {
+		newDirName := strings.TrimSpace(extractDirname(filename, delimiter))
+		if newDirName == "" {
 			continue
 		}
 
-		//ディレクトリ作成
-		destName, err = mkDir(destName, ignoreCase)
-		if err != nil {
-			fmt.Printf("err %v", err)
-		}
+		destDirName := filepath.Join(dir, newDirName)
 
 		// dry run 実装
 		if dryRun {
-			fmt.Printf("move %s to %s\n", oldFileName, filepath.Join(destName, filepath.Base(f)))
+			fmt.Printf("move %s to %s\n", originalFileName, filepath.Join(destDirName, filename))
 		} else {
-			if err := move(destName, oldFileName); err != nil {
+			//ディレクトリ作成
+			destDirName, err = mkDir(destDirName, ignoreCase)
+			if err != nil {
+				fmt.Printf("err %v", err)
+			}
+
+			if err := move(filepath.Join(destDirName, filename), originalFileName); err != nil {
 				log.Fatalf("error %v", err)
 			}
 		}
