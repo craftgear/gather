@@ -153,36 +153,51 @@ func main() {
 		log.Fatal(err)
 	}
 
-	for _, f := range files {
-		//TODO forの中の処理を gather() としてそとに出し、テストを書く
-		err := gather(delimiter, dir, f, winCase, dryRun, ignoreCase)
+	for _, file := range files {
+		filenameWithPath, filename := getFilenameAndPath(file, winCase)
+
+		destDirName := getDestDirName(filename, delimiter, dir)
+		if destDirName == "" {
+			continue
+		}
+
+		err := gather(destDirName, filenameWithPath, filename, dryRun, ignoreCase)
 		if err != nil {
 			fmt.Println(err)
 		}
 	}
 }
 
-func gather(delimiter, dir, f string, winCase, dryRun, ignoreCase bool) error {
-	var err error
-
-	originalFileName := f
-	filename := filepath.Base(f)
+func getFilenameAndPath(f string, winCase bool) (filenameWithPath, filename string) {
+	filenameWithPath = f
+	filename = filepath.Base(f)
 	// win rename 実装
 	if winCase {
 		filename = winCaseRename(filename)
 	}
+	return filenameWithPath, filename
 
+}
+
+func getDestDirName(filename, delimiter, dir string) string {
 	//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
 	newDirName := strings.TrimSpace(extractDirname(filename, delimiter))
 	if newDirName == "" {
-		return nil
+		return ""
 	}
 
 	destDirName := filepath.Join(dir, newDirName)
 
-	// dry run 実装
+	return destDirName
+
+}
+
+func gather(destDirName, filenameWithPath, filename string, dryRun, ignoreCase bool) error {
+	var err error
+
+	// dry run
 	if dryRun {
-		fmt.Printf("move %s to %s\n", originalFileName, filepath.Join(destDirName, filename))
+		fmt.Printf("move %s to %s\n", filenameWithPath, filepath.Join(destDirName, filename))
 	} else {
 		//ディレクトリ作成
 		destDirName, err = mkDir(destDirName, ignoreCase)
@@ -190,7 +205,7 @@ func gather(delimiter, dir, f string, winCase, dryRun, ignoreCase bool) error {
 			return err
 		}
 
-		if err = move(filepath.Join(destDirName, filename), originalFileName); err != nil {
+		if err = move(filepath.Join(destDirName, filename), filenameWithPath); err != nil {
 			return err
 		}
 	}

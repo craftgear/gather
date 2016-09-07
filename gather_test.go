@@ -149,3 +149,15 @@ func TestWinCase(t *testing.T) {
 	}
 
 }
+
+func TestGather(t *testing.T) {
+	//TODO
+}
+
+func TestGetFilenameAndPath(t *testing.T) {
+	//TODO
+}
+
+func TestGetDestDirName(t *testing.T) {
+	//TODO
+}
