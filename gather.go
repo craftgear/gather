@@ -60,7 +60,6 @@ func mkDir(destName string, ignoreCase bool) (string, error) {
 		for _, v := range dirs {
 			// 一致したら、小文字にする前の値を返す
 			if strings.ToLower(filepath.Base(v)) == strings.ToLower(dirName) {
-
 				return v, nil
 			}
 		}
@@ -135,6 +134,7 @@ func main() {
 		flag.PrintDefaults()
 		os.Exit(0)
 	}
+
 	// 対象ディレクトリ
 	if args := flag.Args(); len(args) > 0 {
 		dir = args[0]
@@ -154,34 +154,46 @@ func main() {
 	}
 
 	for _, f := range files {
-		originalFileName := f
-		filename := filepath.Base(f)
-		// win rename 実装
-		if winCase {
-			filename = winCaseRename(filename)
-		}
-
-		//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
-		newDirName := strings.TrimSpace(extractDirname(filename, delimiter))
-		if newDirName == "" {
-			continue
-		}
-
-		destDirName := filepath.Join(dir, newDirName)
-
-		// dry run 実装
-		if dryRun {
-			fmt.Printf("move %s to %s\n", originalFileName, filepath.Join(destDirName, filename))
-		} else {
-			//ディレクトリ作成
-			destDirName, err = mkDir(destDirName, ignoreCase)
-			if err != nil {
-				fmt.Printf("err %v", err)
-			}
-
-			if err := move(filepath.Join(destDirName, filename), originalFileName); err != nil {
-				log.Fatalf("error %v", err)
-			}
+		//TODO forの中の処理を gather() としてそとに出し、テストを書く
+		err := gather(delimiter, dir, f, winCase, dryRun, ignoreCase)
+		if err != nil {
+			fmt.Println(err)
 		}
 	}
+}
+
+func gather(delimiter, dir, f string, winCase, dryRun, ignoreCase bool) error {
+	var err error
+
+	originalFileName := f
+	filename := filepath.Base(f)
+	// win rename 実装
+	if winCase {
+		filename = winCaseRename(filename)
+	}
+
+	//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
+	newDirName := strings.TrimSpace(extractDirname(filename, delimiter))
+	if newDirName == "" {
+		return nil
+	}
+
+	destDirName := filepath.Join(dir, newDirName)
+
+	// dry run 実装
+	if dryRun {
+		fmt.Printf("move %s to %s\n", originalFileName, filepath.Join(destDirName, filename))
+	} else {
+		//ディレクトリ作成
+		destDirName, err = mkDir(destDirName, ignoreCase)
+		if err != nil {
+			return err
+		}
+
+		if err = move(filepath.Join(destDirName, filename), originalFileName); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
