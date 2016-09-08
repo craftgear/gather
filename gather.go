@@ -161,9 +161,13 @@ func main() {
 			continue
 		}
 
-		err := gather(destDirName, filenameWithPath, filename, dryRun, ignoreCase)
-		if err != nil {
-			fmt.Println(err)
+		if dryRun {
+			fmt.Printf("move %s to %s\n", filenameWithPath, filepath.Join(destDirName, filename))
+		} else {
+			err := gather(destDirName, filenameWithPath, filename, ignoreCase)
+			if err != nil {
+				fmt.Println(err)
+			}
 		}
 	}
 }
@@ -171,12 +175,10 @@ func main() {
 func getFilenameAndPath(f string, winCase bool) (filenameWithPath, filename string) {
 	filenameWithPath = f
 	filename = filepath.Base(f)
-	// win rename 実装
 	if winCase {
 		filename = winCaseRename(filename)
 	}
 	return filenameWithPath, filename
-
 }
 
 func getDestDirName(filename, delimiter, dir string) string {
@@ -189,25 +191,19 @@ func getDestDirName(filename, delimiter, dir string) string {
 	destDirName := filepath.Join(dir, newDirName)
 
 	return destDirName
-
 }
 
-func gather(destDirName, filenameWithPath, filename string, dryRun, ignoreCase bool) error {
+func gather(destDirName, filenameWithPath, filename string, ignoreCase bool) error {
 	var err error
 
-	// dry run
-	if dryRun {
-		fmt.Printf("move %s to %s\n", filenameWithPath, filepath.Join(destDirName, filename))
-	} else {
-		//ディレクトリ作成
-		destDirName, err = mkDir(destDirName, ignoreCase)
-		if err != nil {
-			return err
-		}
+	//ディレクトリ作成
+	destDirName, err = mkDir(destDirName, ignoreCase)
+	if err != nil {
+		return err
+	}
 
-		if err = move(filepath.Join(destDirName, filename), filenameWithPath); err != nil {
-			return err
-		}
+	if err = move(filepath.Join(destDirName, filename), filenameWithPath); err != nil {
+		return err
 	}
 
 	return nil
