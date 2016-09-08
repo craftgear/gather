@@ -108,6 +108,26 @@ func winCaseRename(filename string) string {
 	return filename
 }
 
+func getFilename(f string, winCase bool) string {
+	filename := filepath.Base(f)
+	if winCase {
+		filename = winCaseRename(filename)
+	}
+	return filename
+}
+
+func getDestDirName(filename, delimiter, dir string) string {
+	//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
+	newDirName := strings.TrimSpace(extractDirname(filename, delimiter))
+	if newDirName == "" {
+		return ""
+	}
+
+	destDirName := filepath.Join(dir, newDirName)
+
+	return destDirName
+}
+
 func main() {
 	var dir string
 	var delimiter string
@@ -154,57 +174,28 @@ func main() {
 	}
 
 	for _, file := range files {
-		filenameWithPath, filename := getFilenameAndPath(file, winCase)
+		filenameWithPath := file
+		filename := getFilename(filenameWithPath, winCase)
 
 		destDirName := getDestDirName(filename, delimiter, dir)
 		if destDirName == "" {
 			continue
 		}
 
+		if ignoreCase {
+			//ディレクトリ作成
+			destDirName, err = mkDir(destDirName, ignoreCase)
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
 		if dryRun {
 			fmt.Printf("move %s to %s\n", filenameWithPath, filepath.Join(destDirName, filename))
 		} else {
-			err := gather(destDirName, filenameWithPath, filename, ignoreCase)
-			if err != nil {
-				fmt.Println(err)
+			if err := move(filepath.Join(destDirName, filename), filenameWithPath); err != nil {
+				log.Fatal(err)
 			}
 		}
 	}
-}
-
-func getFilenameAndPath(f string, winCase bool) (filenameWithPath, filename string) {
-	filenameWithPath = f
-	filename = filepath.Base(f)
-	if winCase {
-		filename = winCaseRename(filename)
-	}
-	return filenameWithPath, filename
-}
-
-func getDestDirName(filename, delimiter, dir string) string {
-	//デリミタでファイル名を前後に分割、デリミタが見つからなければ何もしない
-	newDirName := strings.TrimSpace(extractDirname(filename, delimiter))
-	if newDirName == "" {
-		return ""
-	}
-
-	destDirName := filepath.Join(dir, newDirName)
-
-	return destDirName
-}
-
-func gather(destDirName, filenameWithPath, filename string, ignoreCase bool) error {
-	var err error
-
-	//ディレクトリ作成
-	destDirName, err = mkDir(destDirName, ignoreCase)
-	if err != nil {
-		return err
-	}
-
-	if err = move(filepath.Join(destDirName, filename), filenameWithPath); err != nil {
-		return err
-	}
-
-	return nil
 }

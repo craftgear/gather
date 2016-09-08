@@ -150,14 +150,45 @@ func TestWinCase(t *testing.T) {
 
 }
 
-func TestGather(t *testing.T) {
-	//TODO
-}
+func TestGetFilename(t *testing.T) {
+	cases := []struct {
+		f       string
+		wincase bool
+		file    string
+	}{
+		{
+			"./test/hoge*.txt",
+			true,
+			"hoge＊.txt",
+		},
+	}
 
-func TestGetFilenameAndPath(t *testing.T) {
-	//TODO
+	for _, c := range cases {
+		f := getFilename(c.f, c.wincase)
+		if f != c.file {
+			t.Errorf("%s should be equal to %s", f, c.file)
+		}
+	}
 }
 
 func TestGetDestDirName(t *testing.T) {
-	//TODO
+	cases := []struct {
+		filename  string
+		delimiter string
+		dir       string
+		out       string
+	}{
+		{
+			"hoge - fuga.txt",
+			" - ",
+			"./test",
+			"test/hoge",
+		},
+	}
+	for _, c := range cases {
+		result := getDestDirName(c.filename, c.delimiter, c.dir)
+		if result != c.out {
+			t.Errorf("%s should be equal to %s", result, c.out)
+		}
+	}
 }
