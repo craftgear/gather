@@ -136,6 +136,9 @@ func main() {
 	var dryRun bool
 	var fileonly bool
 	var winCase bool
+	var truncate bool
+
+	// TODO truncateオプション
 
 	//コマンドラインオプション解析
 	// デリミタ
@@ -145,6 +148,7 @@ func main() {
 	flag.BoolVar(&dryRun, "dry-run", false, "dry run")
 	flag.BoolVar(&fileonly, "f", false, "move files only")
 	flag.BoolVar(&winCase, "wincase", false, "replace characters forbidden on windows platforms with 2-byte characters")
+	flag.BoolVar(&truncate, "truncate", false, "truncate filenames to exclude the first matching part and delimiter")
 	flag.Parse()
 
 	if help {
