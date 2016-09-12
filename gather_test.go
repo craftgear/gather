@@ -121,9 +121,6 @@ func TestMove(t *testing.T) {
 
 	move("./test/c - 03.txt", "./test/c/c - 03.txt")
 	os.Remove("./test/c")
-
-	//TODO dryRun
-	//TODO winCaseRename
 }
 
 func TestWinCase(t *testing.T) {
@@ -147,7 +144,6 @@ func TestWinCase(t *testing.T) {
 			t.Errorf("%s should be %s", renamed, v.expected)
 		}
 	}
-
 }
 
 func TestGetFilename(t *testing.T) {
@@ -192,3 +188,5 @@ func TestGetDestDirName(t *testing.T) {
 		}
 	}
 }
+
+//TODO truncate オプション but how?

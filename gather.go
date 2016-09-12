@@ -48,6 +48,7 @@ func globDir(path string) ([]string, error) {
 }
 
 func mkDir(destName string, ignoreCase bool) (string, error) {
+	fmt.Printf("destName = %+v\n", destName)
 	if ignoreCase {
 		path, dirName := filepath.Split(destName)
 
@@ -66,6 +67,8 @@ func mkDir(destName string, ignoreCase bool) (string, error) {
 	}
 
 	// 一致するものがなかったらディレクトリ作成、すでにディレクトリかファイルがある場合エラーになるので、エラーは無視する
+
+	fmt.Printf("destName = %+v\n", destName)
 	_ = os.Mkdir(destName, 0755)
 	return destName, nil
 }
@@ -186,19 +189,22 @@ func main() {
 			continue
 		}
 
-		if ignoreCase {
-			//ディレクトリ作成
-			destDirName, err = mkDir(destDirName, ignoreCase)
-			if err != nil {
-				log.Fatal(err)
-			}
+		if truncate {
+			temp := strings.SplitN(filename, delimiter, 2)
+			filename = temp[1]
+		}
+
+		//ディレクトリ作成
+		destDirName, err = mkDir(destDirName, ignoreCase)
+		if err != nil {
+			log.Fatal("mkDir failed\n", err)
 		}
 
 		if dryRun {
 			fmt.Printf("move %s to %s\n", filenameWithPath, filepath.Join(destDirName, filename))
 		} else {
 			if err := move(filepath.Join(destDirName, filename), filenameWithPath); err != nil {
-				log.Fatal(err)
+				log.Fatal("move failed\n", err)
 			}
 		}
 	}
