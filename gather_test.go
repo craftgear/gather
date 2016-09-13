@@ -110,7 +110,10 @@ func TestMove(t *testing.T) {
 	}
 	dest = filepath.Join("./test", dest)
 	dest, err := mkDir(dest, false)
-	err = move(filepath.Join(dest, fname), originalName)
+	if err != nil {
+		t.Error(err)
+	}
+	err = move(originalName, filepath.Join(dest, fname))
 	if err != nil {
 		t.Error(err)
 	}
@@ -119,7 +122,7 @@ func TestMove(t *testing.T) {
 		t.Errorf("error %v", err)
 	}
 
-	move("./test/c - 03.txt", "./test/c/c - 03.txt")
+	move("./test/c/c - 03.txt", "./test/c - 03.txt")
 	os.Remove("./test/c")
 }
 

@@ -48,7 +48,6 @@ func globDir(path string) ([]string, error) {
 }
 
 func mkDir(destName string, ignoreCase bool) (string, error) {
-	fmt.Printf("destName = %+v\n", destName)
 	if ignoreCase {
 		path, dirName := filepath.Split(destName)
 
@@ -73,8 +72,7 @@ func mkDir(destName string, ignoreCase bool) (string, error) {
 	return destName, nil
 }
 
-func move(destName, originalFileName string) error {
-
+func move(originalFileName, destName string) error {
 	absDestName, err := filepath.Abs(destName)
 	if err != nil {
 		log.Fatal(err)
@@ -203,7 +201,7 @@ func main() {
 		if dryRun {
 			fmt.Printf("move %s to %s\n", filenameWithPath, filepath.Join(destDirName, filename))
 		} else {
-			if err := move(filepath.Join(destDirName, filename), filenameWithPath); err != nil {
+			if err := move(filenameWithPath, filepath.Join(destDirName, filename)); err != nil {
 				log.Fatal("move failed\n", err)
 			}
 		}
