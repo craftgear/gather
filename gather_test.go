@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-var testDir string = "test/"
+var testDir = "test/"
 
 func TestMain(m *testing.M) {
 	m.Run()

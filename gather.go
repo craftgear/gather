@@ -153,7 +153,7 @@ func main() {
 	flag.Parse()
 
 	if help {
-		fmt.Println("\ngather - a simple utility to move files\n")
+		fmt.Print("\ngather - a simple utility to move files\n\n")
 		fmt.Println("Usage: gather [options] target_dir")
 		fmt.Println("Options:")
 		flag.PrintDefaults()
