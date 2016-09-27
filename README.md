@@ -3,7 +3,7 @@
 [![LICENSE](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 <!--[![GoDoc](https://godoc.org/github.com/craftgear/gather?status.svg)](https://godoc.org/github.com/craftgear/gather)-->
 
-<!--English / [日本語](https://github.com/craftgear/gather/blob/master/README.ja.md)-->
+English / [日本語](https://github.com/craftgear/gather/blob/master/README.ja.md)
 
 # gather
 
