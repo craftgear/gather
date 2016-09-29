@@ -193,3 +193,33 @@ func TestGetDestDirName(t *testing.T) {
 }
 
 //TODO truncate オプション but how?
+func TestGetTruncatedFilename(t *testing.T) {
+	cases := []struct {
+		delimiter string
+		filename  string
+		out       string
+	}{
+		{
+			delimiter: " - ",
+			filename:  "hoge - fuga.txt",
+			out:       "fuga.txt",
+		},
+		{
+			delimiter: " - ",
+			filename:  "hoge_fuga.txt",
+			out:       "hoge_fuga.txt",
+		},
+		{
+			delimiter: "_",
+			filename:  "hoge_fuga.txt",
+			out:       "fuga.txt",
+		},
+	}
+
+	for _, c := range cases {
+		actual := getTruncatedFilename(c.filename, c.delimiter)
+		if actual != c.out {
+			t.Errorf("%s should be equal %s", actual, c.out)
+		}
+	}
+}
