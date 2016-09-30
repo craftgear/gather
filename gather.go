@@ -129,6 +129,14 @@ func getDestDirName(filename, delimiter, dir string) string {
 	return destDirName
 }
 
+func getTruncatedFilename(filename, delimiter string) string {
+	temp := strings.SplitN(filename, delimiter, 2)
+	if len(temp) != 2 {
+		return filename
+	}
+	return temp[1]
+}
+
 func main() {
 	var dir string
 	var delimiter string
@@ -188,8 +196,7 @@ func main() {
 		}
 
 		if truncate {
-			temp := strings.SplitN(filename, delimiter, 2)
-			filename = temp[1]
+			filename = getTruncatedFilename(filename, delimiter)
 		}
 
 		//ディレクトリ作成
