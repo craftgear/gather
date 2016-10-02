@@ -46,7 +46,7 @@ To replace characters on Windows platforms, run with `-wincase` option:
 ``gather -wincase``
 Details on [wincase](https://github.com/craftgear/wincase).
 
-(WIP)To rename files to names without directory names after moving, run with `-truncate` option:
+To rename files to names without directory names after moving, run with `-truncate` option:
 ``gather -truncate``
 If `-truncate` option is specified, *gather* moves files and renames them at the same time. New filenames will be without direnctory names they are in. ex) `Project - 01.md` would become `Project/01.md`.
 
