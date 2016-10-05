@@ -66,8 +66,6 @@ func mkDir(destName string, ignoreCase bool) (string, error) {
 	}
 
 	// 一致するものがなかったらディレクトリ作成、すでにディレクトリかファイルがある場合エラーになるので、エラーは無視する
-
-	fmt.Printf("destName = %+v\n", destName)
 	_ = os.Mkdir(destName, 0755)
 	return destName, nil
 }
