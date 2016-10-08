@@ -46,7 +46,7 @@
 ``gather -wincase``
 詳しくは [wincase](https://github.com/craftgear/wincase) をご覧ください。
 
-(実装中) ファイル名から、サブディレクトリの部分を削除して移動するには:
+ファイル名から、サブディレクトリの部分を削除して移動するには:
 ``gather -truncate``
 
 `-truncate`オプションを指定すると、ファイルを移動すると同時に、フィアル名が短くなるようにリネームを行います。`Project - 01.md` というファイルは、 `Project/01.md`　となります。
